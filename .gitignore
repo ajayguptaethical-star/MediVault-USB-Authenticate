@@ -1,0 +1,32 @@
+# Database & local data
+*.db
+*.sqlite3
+medical_records.db
+storage/
+storage_decrypted/
+
+# Environment and sensitive keys
+.env
+*.pem
+*.key
+credentials/*.json
+!credentials/*.json.example
+
+# Temporary / Zip files
+mingit.zip
+*.zip
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+
+# IDE & Editor
+.vscode/
+.idea/
+.DS_Store

@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MedSecure • Doctor Medical Record Management Dashboard</title>
+  
+  <!-- Modern Typography: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Clinical Healthcare CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ==================== AUTHENTICATION OVERLAY ==================== -->
+  <div class="auth-overlay" id="authModalOverlay">
+    <!-- Login Card -->
+    <div class="auth-card" id="loginCard">
+      <div class="auth-card-header">
+        <div class="auth-logo">
+          <i class="fa-solid fa-staff-snake"></i>
+        </div>
+        <h2 style="font-size: 20px; font-weight: 800; color: var(--secondary);">MedSecure Clinical Portal</h2>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Authorized Medical Personnel Only</p>
+      </div>
+      <div class="auth-card-body">
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius-md); padding: 10px 14px; margin-bottom: 18px; font-size: 12px; color: #166534;">
+          <strong>Demo Doctor Account:</strong><br>
+          Email: <code style="font-weight: 600;">doctor@fedmedx.org</code><br>
+          Password: <code style="font-weight: 600;">Doctor@12345</code>
+        </div>
+
+        <form id="loginForm">
+          <div class="form-group">
+            <label class="form-label" for="loginEmail">Doctor Email Address</label>
+            <input type="email" id="loginEmail" class="form-control" placeholder="doctor@hospital.org" value="doctor@fedmedx.org" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="loginPassword">Doctor Password</label>
+            <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" value="Doctor@12345" required>
+          </div>
+          <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 11px; margin-top: 8px;">
+            <i class="fa-solid fa-right-to-bracket"></i> Secure Doctor Login
+          </button>
+        </form>
+
+        <div class="auth-toggle">
+          Don't have an account? <a id="toRegisterLink">Register New Doctor</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Register Card -->
+    <div class="auth-card" id="registerCard" style="display: none;">
+      <div class="auth-card-header">
+        <div class="auth-logo">
+          <i class="fa-solid fa-user-doctor"></i>
+        </div>
+        <h2 style="font-size: 20px; font-weight: 800; color: var(--secondary);">Register Doctor Account</h2>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Join FedMedX Medical Record Network</p>
+      </div>
+      <div class="auth-card-body">
+        <form id="registerForm">
+          <div class="form-group">
+            <label class="form-label" for="regName">Full Name & Credentials</label>
+            <input type="text" id="regName" class="form-control" placeholder="Dr. John Doe, MD" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="regEmail">Work Email Address</label>
+            <input type="email" id="regEmail" class="form-control" placeholder="jdoe@fedmedx.org" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="regSpecialty">Medical Specialty</label>
+              <input type="text" id="regSpecialty" class="form-control" placeholder="Cardiology, Oncology...">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="regPhone">Contact Phone</label>
+              <input type="tel" id="regPhone" class="form-control" placeholder="+1 (555) 000-0000">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="regPassword">Secure Password (min 6 characters)</label>
+            <input type="password" id="regPassword" class="form-control" placeholder="••••••••" minlength="6" required>
+          </div>
+          <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 11px;">
+            <i class="fa-solid fa-user-plus"></i> Complete Doctor Registration
+          </button>
+        </form>
+        <div class="auth-toggle">
+          Already registered? <a id="toLoginLink">Sign In to Portal</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MAIN DASHBOARD CONTAINER ==================== -->
+  <div class="app-container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo-icon">
+          <i class="fa-solid fa-shield-virus"></i>
+        </div>
+        <div class="sidebar-brand">
+          <h2>MedSecure</h2>
+          <span>EHR • Medical Vault</span>
+        </div>
+      </div>
+
+      <ul class="sidebar-menu">
+        <div class="sidebar-label">Clinical Workflow</div>
+        <li>
+          <a class="menu-item active" data-view="overview">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu-item" data-view="patients">
+            <i class="fa-solid fa-hospital-user"></i>
+            <span>Patient Records</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu-item" data-view="reports">
+            <i class="fa-solid fa-file-medical"></i>
+            <span>Diagnostic Reports</span>
+          </a>
+        </li>
+
+        <div class="sidebar-label">Security & Hardware</div>
+        <li>
+          <a class="menu-item" data-view="usb">
+            <i class="fa-solid fa-key"></i>
+            <span>USB Security Key</span>
+          </a>
+        </li>
+        <li>
+          <a class="menu-item" data-view="audit">
+            <i class="fa-solid fa-clipboard-list"></i>
+            <span>Audit Trail & HIPAA</span>
+          </a>
+        </li>
+
+        <div class="sidebar-label">Doctor Management</div>
+        <li>
+          <a class="menu-item" data-view="profile">
+            <i class="fa-solid fa-user-doctor"></i>
+            <span>Doctor Profile</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <div class="doctor-mini-profile">
+          <div class="doctor-avatar doctor-avatar-initials">MD</div>
+          <div class="doctor-details">
+            <h4 class="doctor-name-display">Dr. Sarah Jenkins</h4>
+            <p class="doctor-specialty-display">Internal Medicine</p>
+          </div>
+        </div>
+        <button class="logout-btn" id="logoutBtn">
+          <i class="fa-solid fa-power-off"></i> Secure Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+      
+      <!-- Top Sticky Header -->
+      <header class="top-header">
+        <div class="header-search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="headerGlobalSearch" placeholder="Search patients by name, ID, or diagnosis (Enter)...">
+        </div>
+
+        <div class="header-actions">
+          <!-- Google Drive Patient Records Folder -->
+          <a href="https://drive.google.com/drive/folders/1DYdRmBvRsPSzTZ7_XXxEMF725mv9yHis" target="_blank" class="btn-secondary" style="font-size: 12px; padding: 6px 12px; text-decoration: none; color: #059669; border-color: #a7f3d0; background: #ecfdf5;" title="Open Patient Records Google Drive Folder">
+            <i class="fa-brands fa-google-drive" style="color: #059669;"></i>
+            <span>Patient Records Drive</span>
+            <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 10px;"></i>
+          </a>
+
+          <!-- Google Drive Reports Folder -->
+          <a href="https://drive.google.com/drive/folders/1yf-glDrsL1pUPC_mdxKS7tqBH46RjZjU?usp=drive_link" target="_blank" class="btn-secondary" style="font-size: 12px; padding: 6px 12px; text-decoration: none; color: #0284c7; border-color: #bae6fd; background: #f0f9ff;" title="Open Doctor Reports Google Drive Folder">
+            <i class="fa-brands fa-google-drive" style="color: #0284c7;"></i>
+            <span>Reports Drive</span>
+            <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 10px;"></i>
+          </a>
+
+          <!-- USB Hardware Key Status Indicator -->
+          <div class="usb-status-badge disconnected" id="usbStatusBadge" title="Click to manage USB Security Key">
+            <i class="fa-solid fa-usb"></i>
+            <span>USB Pen Drive: Checking...</span>
+          </div>
+
+          <!-- Add Patient Button -->
+          <button class="btn-primary" id="openAddPatientModalBtn">
+            <i class="fa-solid fa-user-plus"></i>
+            <span>Add Patient</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Page Body Content Views -->
+      <main class="page-body">
+
+        <!-- ==================== VIEW 1: OVERVIEW ==================== -->
+        <section class="page-view active" id="view-overview">
+          <div class="page-title-bar">
+            <div>
+              <h1>Doctor Clinical Dashboard</h1>
+              <p>Welcome back, <span class="doctor-name-display" style="font-weight: 600; color: var(--primary);">Dr. Jenkins</span> • <span class="doctor-hospital-display">FedMedX Medical System</span></p>
+            </div>
+            <div>
+              <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">
+                <i class="fa-regular fa-clock"></i> System Operational • AES-256 & TLS 1.3 Active
+              </span>
+            </div>
+          </div>
+
+          <!-- Stats Counters Grid -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-info">
+                <span>Total Active Patients</span>
+                <h3 id="statTotalPatients">0</h3>
+                <small><i class="fa-solid fa-arrow-trend-up"></i> Registered in Database</small>
+              </div>
+              <div class="stat-icon blue">
+                <i class="fa-solid fa-users"></i>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-info">
+                <span>Diagnostic Reports</span>
+                <h3 id="statTotalReports">0</h3>
+                <small><i class="fa-brands fa-google-drive"></i> Cloud & Vault Stored</small>
+              </div>
+              <div class="stat-icon green">
+                <i class="fa-solid fa-file-waveform"></i>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-info">
+                <span>Sensitive Health Records</span>
+                <h3 id="statSensitiveReports">0</h3>
+                <small style="color: var(--sensitive-badge);"><i class="fa-solid fa-shield-halved"></i> HIV & Restricted Files</small>
+              </div>
+              <div class="stat-icon purple">
+                <i class="fa-solid fa-lock"></i>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-info">
+                <span>Storage Architecture</span>
+                <h3 id="statStorageProvider" style="font-size: 20px;">Google Drive</h3>
+                <small><i class="fa-solid fa-cloud-check"></i> Encrypted Multi-Tier</small>
+              </div>
+              <div class="stat-icon amber">
+                <i class="fa-solid fa-cloud"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dashboard Two-Column Grid -->
+          <div class="dashboard-grid">
+            <!-- Left: Recent Patients Feed -->
+            <div class="card">
+              <div class="card-header">
+                <h3><i class="fa-solid fa-clock-rotate-left" style="color: var(--primary); margin-right: 8px;"></i> Recent Patient Visits</h3>
+                <button class="btn-secondary" style="font-size: 12px; padding: 5px 12px;" onclick="Dashboard.switchView('patients')">
+                  View All Patients <i class="fa-solid fa-arrow-right"></i>
+                </button>
+              </div>
+              <div class="card-body">
+                <div id="recentPatientsList">
+                  <div style="text-align: center; padding: 24px; color: var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Loading recent activity...</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Quick Actions & Security Status -->
+            <div>
+              <div class="card">
+                <div class="card-header">
+                  <h3><i class="fa-solid fa-shield-halved" style="color: var(--accent); margin-right: 8px;"></i> Security Clearance</h3>
+                </div>
+                <div class="card-body">
+                  <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+                    Access to sensitive medical files (e.g. HIV reports) requires cryptographic USB hardware device verification.
+                  </p>
+                  <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="USBSecurity.openUSBModal()">
+                    <i class="fa-solid fa-usb"></i> Verify USB Security Key
+                  </button>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h3><i class="fa-solid fa-bolt" style="color: var(--warning); margin-right: 8px;"></i> Quick Clinical Actions</h3>
+                </div>
+                <div class="card-body" style="display: flex; flex-direction: column; gap: 10px;">
+                  <button class="btn-secondary" style="justify-content: flex-start;" onclick="Patients.openAddModal()">
+                    <i class="fa-solid fa-user-plus" style="color: var(--primary);"></i> Add New Patient
+                  </button>
+                  <button class="btn-secondary" style="justify-content: flex-start;" onclick="Dashboard.switchView('reports')">
+                    <i class="fa-solid fa-folder-open" style="color: var(--accent);"></i> Browse Medical Reports
+                  </button>
+                  <button class="btn-secondary" style="justify-content: flex-start;" onclick="Dashboard.switchView('audit')">
+                    <i class="fa-solid fa-shield-heart" style="color: var(--sensitive-badge);"></i> View HIPAA Audit Logs
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 2: PATIENT RECORDS ==================== -->
+        <section class="page-view" id="view-patients">
+          <div class="page-title-bar">
+            <div>
+              <h1>Patient Clinical Directory</h1>
+              <p>Manage confidential patient records, diagnosis history, and medical treatments</p>
+            </div>
+            <button class="btn-primary" onclick="Patients.openAddModal()">
+              <i class="fa-solid fa-user-plus"></i> Add New Patient
+            </button>
+          </div>
+
+          <div class="card">
+            <div class="card-header" style="gap: 16px;">
+              <div class="header-search" style="width: 100%; max-width: 480px;">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="patientSearchInput" placeholder="Filter by patient name, UID, diagnosis, or phone number...">
+              </div>
+              <button class="btn-secondary" onclick="Patients.loadPatients()">
+                <i class="fa-solid fa-rotate"></i> Refresh
+              </button>
+            </div>
+            <div class="card-body" style="padding: 0;">
+              <div class="table-responsive">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Patient UID</th>
+                      <th>Patient Name & Contact</th>
+                      <th>Age / Gender</th>
+                      <th>Diagnosis / Condition</th>
+                      <th>Visit Date</th>
+                      <th>Classification</th>
+                      <th style="text-align: right; padding-right: 28px;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="patientsTableBody">
+                    <tr><td colspan="7" style="text-align: center; padding: 24px;"><i class="fa-solid fa-spinner fa-spin"></i> Loading patients...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 3: DIAGNOSTIC REPORTS ==================== -->
+        <section class="page-view" id="view-reports">
+          <div class="page-title-bar">
+            <div>
+              <h1>Diagnostic Medical Reports & Documents</h1>
+              <p>Securely stored in Google Drive Cloud and Encrypted Storage Vault</p>
+            </div>
+            <span class="badge badge-sensitive" style="font-size: 13px; padding: 8px 14px;">
+              <i class="fa-solid fa-lock"></i> HIV & Sensitive Reports USB-Gated
+            </span>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3><i class="fa-solid fa-file-medical" style="color: var(--primary); margin-right: 8px;"></i> Recent Diagnostic Uploads</h3>
+              <button class="btn-secondary" onclick="Reports.loadAllRecentReports()">
+                <i class="fa-solid fa-rotate"></i> Refresh Reports
+              </button>
+            </div>
+            <div class="card-body" style="padding: 0;">
+              <div class="table-responsive">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>File Name</th>
+                      <th>Patient Information</th>
+                      <th>Report Type</th>
+                      <th>Sensitivity Level</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recentReportsTableBody">
+                    <tr><td colspan="5" style="text-align: center; padding: 24px;"><i class="fa-solid fa-spinner fa-spin"></i> Loading reports...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 4: USB SECURITY KEY ==================== -->
+        <section class="page-view" id="view-usb">
+          <div class="page-title-bar">
+            <div>
+              <h1>USB Hardware Security Key Management</h1>
+              <p>Hardware-level physical token authentication for doctor workstations</p>
+            </div>
+            <button class="btn-primary" onclick="USBSecurity.openUSBModal()">
+              <i class="fa-solid fa-shield-halved"></i> USB Key Scanner
+            </button>
+          </div>
+
+          <div class="dashboard-grid">
+            <div>
+              <div class="card">
+                <div class="card-header">
+                  <h3><i class="fa-solid fa-hard-drive" style="color: var(--primary); margin-right: 8px;"></i> Connected Storage Devices & Drives</h3>
+                  <button class="btn-secondary" style="font-size: 12px; padding: 5px 12px;" onclick="USBSecurity.scanDrives()">
+                    <i class="fa-solid fa-rotate"></i> Scan Now
+                  </button>
+                </div>
+                <div class="card-body">
+                  <div id="usbDrivesList">
+                    <p style="color: var(--text-muted); font-size: 13px;">Click "Scan Now" to detect attached USB removable flash drives.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h3><i class="fa-solid fa-list-check" style="color: var(--accent); margin-right: 8px;"></i> Registered Doctor Security Keys</h3>
+                </div>
+                <div class="card-body">
+                  <div id="registeredUSBKeysList">
+                    <p style="color: var(--text-muted); font-size: 13px;">Loading active keys...</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="card">
+                <div class="card-header">
+                  <h3><i class="fa-solid fa-key" style="color: var(--warning); margin-right: 8px;"></i> Issue New USB Security Key</h3>
+                </div>
+                <div class="card-body">
+                  <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+                    Generate a signed cryptographic token for your physical USB flash drive. Accessing highly sensitive patient records (such as HIV reports) requires this token.
+                  </p>
+                  <button class="btn-primary" style="width: 100%; justify-content: center; margin-bottom: 12px;" onclick="USBSecurity.generateKey()">
+                    <i class="fa-solid fa-download"></i> Generate & Download .medkey Token
+                  </button>
+                  <button class="btn-secondary" style="width: 100%; justify-content: center;" onclick="USBSecurity.simulateDemoKey()">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> One-Click Demo USB Key Verification
+                  </button>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h3><i class="fa-solid fa-circle-info" style="color: var(--primary); margin-right: 8px;"></i> How Hardware Security Works</h3>
+                </div>
+                <div class="card-body" style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
+                  <ol style="padding-left: 20px;">
+                    <li>Copy the downloaded <code>medsecure.medkey</code> file to the root folder of any USB flash drive.</li>
+                    <li>Plug the USB drive into your workstation.</li>
+                    <li>Click <b>"Authenticate Drive"</b> in the USB Scanner.</li>
+                    <li>Once verified, your session has full clearance to preview and download confidential records.</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 5: AUDIT TRAIL ==================== -->
+        <section class="page-view" id="view-audit">
+          <div class="page-title-bar">
+            <div>
+              <h1>HIPAA & Medical Security Audit Logs</h1>
+              <p>Immutable record of logins, patient updates, report views, and USB hardware events</p>
+            </div>
+            <button class="btn-secondary" onclick="Dashboard.loadAuditLogs()">
+              <i class="fa-solid fa-rotate"></i> Refresh Audit Trail
+            </button>
+          </div>
+
+          <div class="card">
+            <div class="card-body" style="padding: 0;">
+              <div class="table-responsive">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Timestamp</th>
+                      <th>Action</th>
+                      <th>Doctor / Identity</th>
+                      <th>IP Address</th>
+                      <th>Details & Audit Metadata</th>
+                    </tr>
+                  </thead>
+                  <tbody id="auditLogsTableBody">
+                    <tr><td colspan="5" style="text-align: center; padding: 24px;"><i class="fa-solid fa-spinner fa-spin"></i> Loading audit trail...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 6: DOCTOR PROFILE ==================== -->
+        <section class="page-view" id="view-profile">
+          <div class="page-title-bar">
+            <div>
+              <h1>Doctor Profile & Credentials</h1>
+              <p>Verified practitioner details and hospital affiliation</p>
+            </div>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="card">
+              <div class="card-header">
+                <h3><i class="fa-solid fa-id-card" style="color: var(--primary); margin-right: 8px;"></i> Physician Identification</h3>
+              </div>
+              <div class="card-body">
+                <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 24px;">
+                  <div class="doctor-avatar doctor-avatar-initials" style="width: 72px; height: 72px; font-size: 26px;">MD</div>
+                  <div>
+                    <h2 class="doctor-name-display" style="font-size: 20px; color: var(--secondary);">Dr. Sarah Jenkins</h2>
+                    <p class="doctor-specialty-display" style="color: var(--primary); font-weight: 600;">Internal Medicine & Infectious Diseases</p>
+                    <p class="doctor-hospital-display" style="font-size: 13px; color: var(--text-muted);">FedMedX Memorial Medical Center</p>
+                  </div>
+                </div>
+
+                <div class="form-row" style="margin-bottom: 16px;">
+                  <div>
+                    <label class="form-label">Email Address</label>
+                    <p class="doctor-email-display" style="font-weight: 600; color: var(--secondary); background: #f8fafc; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">doctor@fedmedx.org</p>
+                  </div>
+                  <div>
+                    <label class="form-label">Hospital Affiliation</label>
+                    <p class="doctor-hospital-display" style="font-weight: 600; color: var(--secondary); background: #f8fafc; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">FedMedX Memorial</p>
+                  </div>
+                </div>
+
+                <div style="margin-top: 24px; padding: 16px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius-md);">
+                  <div style="font-weight: 700; color: #166534; font-size: 14px; margin-bottom: 4px;">
+                    <i class="fa-solid fa-circle-check"></i> Credential Status: Verified Physician
+                  </div>
+                  <p style="font-size: 12px; color: #15803d;">
+                    Full clinical clearance granted. Authorized to create patient charts, issue treatments, and upload diagnostic imaging to Google Drive.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="card">
+                <div class="card-header">
+                  <h3><i class="fa-solid fa-cloud" style="color: var(--primary); margin-right: 8px;"></i> Google Drive Integration</h3>
+                </div>
+                <div class="card-body" style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
+                  <p style="margin-bottom: 12px;">
+                    Medical files are saved directly to Google Drive via the official Google Drive API v3.
+                  </p>
+                  <div style="background: #f8fafc; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-family: monospace; font-size: 12px;">
+                    credentials/service_account.json
+                  </div>
+                  <p style="margin-top: 12px; font-size: 12px;">
+                    Place your Google Cloud Service Account JSON file in the <code>credentials/</code> folder to direct all uploads to your institutional Drive folder.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: ADD / EDIT PATIENT ==================== -->
+  <div class="modal-overlay" id="patientModal">
+    <div class="modal-container large">
+      <div class="modal-header">
+        <h3 id="patientModalTitle">Add New Patient Record</h3>
+        <button class="modal-close" onclick="Patients.closePatientModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="addPatientForm">
+        <div class="modal-body">
+          <input type="hidden" id="patientEditId">
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="patientName">Patient Full Name *</label>
+              <input type="text" id="patientName" class="form-control" placeholder="e.g. Johnathan Smith" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="patientPhone">Phone Number</label>
+              <input type="tel" id="patientPhone" class="form-control" placeholder="+1 (555) 234-5678">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="patientAge">Age (Years) *</label>
+              <input type="number" id="patientAge" class="form-control" min="0" max="130" placeholder="35" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="patientGender">Gender *</label>
+              <select id="patientGender" class="form-control" required>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="patientDiagnosis">Disease / Diagnosis *</label>
+              <input type="text" id="patientDiagnosis" class="form-control" placeholder="e.g. Type 2 Diabetes, HIV-1 Infection, Acute Bronchitis" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="patientVisitDate">Date of Visit *</label>
+              <input type="date" id="patientVisitDate" class="form-control" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="patientHistory">Previous Medical History</label>
+            <textarea id="patientHistory" class="form-control" placeholder="Prior surgeries, allergies, chronic conditions, family history..."></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="patientTreatment">Current Treatment Protocol</label>
+              <textarea id="patientTreatment" class="form-control" placeholder="Therapies, dietary plans, clinical instructions..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="patientMedicines">Current Medicines & Dosages</label>
+              <textarea id="patientMedicines" class="form-control" placeholder="e.g. Metformin 500mg BD, Atorvastatin 20mg OD..."></textarea>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="patientNotes">Doctor's Confidential Clinical Notes</label>
+            <textarea id="patientNotes" class="form-control" placeholder="Confidential clinical observations, follow-up schedule..."></textarea>
+          </div>
+
+          <!-- Integrated Patient Photo / Medical Report Upload Option -->
+          <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: var(--radius-md); padding: 16px; margin-top: 14px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+              <label class="form-label" style="margin-bottom: 0; color: #0369a1; font-weight: 700;">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Patient Photo / Medical Report Image (Google Drive Auto-Upload)
+              </label>
+              <span class="badge badge-blue">Optional</span>
+            </div>
+            <div class="form-row">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 11px;">Document / Report Type</label>
+                <select id="patientNewReportType" class="form-control" style="font-size: 13px;">
+                  <option value="Patient Photo">Patient Photo</option>
+                  <option value="X-Ray">X-Ray (Radiology)</option>
+                  <option value="Blood Report">Blood Report</option>
+                  <option value="HIV Report">HIV Report (Sensitive / Confidential)</option>
+                  <option value="Prescription">Prescription Document</option>
+                  <option value="Scan Reports">Scan Reports (CT / MRI)</option>
+                  <option value="Other Medical Documents">Other Medical Document</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 11px;">Select Image / PDF File</label>
+                <input type="file" id="patientNewReportFile" class="form-control" accept=".jpg,.jpeg,.png,.pdf" style="font-size: 12px; padding: 6px 8px;">
+              </div>
+            </div>
+            <div id="patientNewReportPreview" style="display: none; margin-top: 10px; font-size: 12px; color: #0369a1; font-weight: 600;"></div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">
+              <i class="fa-brands fa-google-drive" style="color: #0284c7;"></i>
+              Patient ka record aur yeh image/document automatically aapke Google Drive folder (<code>1yf-glDrsL1pUPC_mdxKS7tqBH46RjZjU</code>) me save ho jayenge.
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="Patients.closePatientModal()">Cancel</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Patient Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: PATIENT DETAIL & MEDICAL HISTORY ==================== -->
+  <div class="modal-overlay" id="patientDetailModal">
+    <div class="modal-container large">
+      <div class="modal-header">
+        <div>
+          <h3 id="detailPatientName">Patient Full Details</h3>
+          <div style="display: flex; gap: 8px; margin-top: 4px; font-size: 12px; color: var(--text-muted);">
+            UID: <code id="detailPatientUID" style="color: var(--primary); font-weight: 700;">PAT-0000</code>
+            <span>•</span>
+            <span id="detailPatientDemographics">Age / Gender</span>
+          </div>
+        </div>
+        <button class="modal-close" onclick="Patients.closeDetailModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Diagnosis Banner -->
+        <div style="background: #e0f2fe; border: 1px solid #bae6fd; border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 20px;">
+          <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px;">Current Primary Diagnosis</div>
+          <div id="detailPatientDiagnosis" style="font-size: 18px; font-weight: 800; color: var(--secondary); margin-top: 2px;">Diagnosis text</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+            Visit Date: <strong id="detailPatientVisitDate">YYYY-MM-DD</strong>
+          </div>
+        </div>
+
+        <!-- Clinical History Sections Grid -->
+        <div class="form-row" style="margin-bottom: 16px;">
+          <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px;">
+            <strong style="font-size: 13px; color: var(--secondary); display: block; margin-bottom: 6px;">
+              <i class="fa-solid fa-notes-medical" style="color: var(--primary);"></i> Previous Medical History
+            </strong>
+            <p id="detailPatientHistory" style="font-size: 13px; color: var(--text-main); white-space: pre-line;">-</p>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px;">
+            <strong style="font-size: 13px; color: var(--secondary); display: block; margin-bottom: 6px;">
+              <i class="fa-solid fa-pills" style="color: var(--accent);"></i> Prescribed Medicines
+            </strong>
+            <p id="detailPatientMedicines" style="font-size: 13px; color: var(--text-main); white-space: pre-line;">-</p>
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-bottom: 24px;">
+          <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px;">
+            <strong style="font-size: 13px; color: var(--secondary); display: block; margin-bottom: 6px;">
+              <i class="fa-solid fa-stethoscope" style="color: var(--warning);"></i> Active Treatment Protocol
+            </strong>
+            <p id="detailPatientTreatment" style="font-size: 13px; color: var(--text-main); white-space: pre-line;">-</p>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px;">
+            <strong style="font-size: 13px; color: var(--secondary); display: block; margin-bottom: 6px;">
+              <i class="fa-solid fa-user-lock" style="color: var(--sensitive-badge);"></i> Confidential Doctor Notes
+            </strong>
+            <p id="detailPatientNotes" style="font-size: 13px; color: var(--text-main); white-space: pre-line;">-</p>
+          </div>
+        </div>
+
+        <!-- Attached Reports Section -->
+        <hr style="border: none; border-top: 1px solid var(--border-color); margin-bottom: 20px;">
+        <div id="detailReportsContainer">
+          <!-- Reports injected dynamically -->
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="Patients.closeDetailModal()">Close Window</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: UPLOAD MEDICAL REPORT ==================== -->
+  <div class="modal-overlay" id="uploadReportModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 id="uploadReportModalTitle">Upload Diagnostic Medical Report</h3>
+        <button class="modal-close" onclick="Reports.closeUploadModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="uploadReportForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="uploadReportType">Diagnostic Report Category *</label>
+            <select id="uploadReportType" class="form-control" required>
+              <option value="X-Ray">X-Ray (Radiology)</option>
+              <option value="Blood Report">Blood Report (Hematology / Biochemistry)</option>
+              <option value="HIV Report">HIV Report (Sensitive / Confidential)</option>
+              <option value="Prescription">Prescription Document</option>
+              <option value="Scan Reports">Scan Reports (CT / MRI / Ultrasound)</option>
+              <option value="Other Medical Documents">Other Medical Document</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Medical File (JPG, JPEG, PNG, PDF up to 25MB) *</label>
+            <div class="upload-dropzone" id="reportDropzone">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <p><strong>Click to browse</strong> or drag & drop file here</p>
+              <span style="font-size: 12px; color: var(--text-light);">Supported: .jpg, .jpeg, .png, .pdf</span>
+            </div>
+            <input type="file" id="reportFileInput" accept=".jpg,.jpeg,.png,.pdf" style="display: none;">
+            <div id="selectedFileInfo" style="display: none; margin-top: 10px;"></div>
+          </div>
+
+          <div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: var(--radius-md); padding: 12px 16px; margin-top: 14px; display: flex; align-items: center; gap: 12px;">
+            <input type="checkbox" id="uploadIsSensitive" style="width: 18px; height: 18px; cursor: pointer;">
+            <label for="uploadIsSensitive" style="font-size: 13px; font-weight: 600; color: #6b21a8; cursor: pointer;">
+              Classify as Highly Sensitive (Requires USB Security Key verification to view)
+            </label>
+          </div>
+
+          <div style="margin-top: 14px; font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+            <i class="fa-brands fa-google-drive" style="color: var(--accent);"></i>
+            <span>File will be processed by FastAPI and securely uploaded to the Google Drive Cloud repository.</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="Reports.closeUploadModal()">Cancel</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Document</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: IN-BROWSER REPORT PREVIEW LIGHTBOX ==================== -->
+  <div class="modal-overlay" id="reportPreviewModal">
+    <div class="modal-container large" style="max-height: 95vh;">
+      <div class="modal-header">
+        <h3 id="reportPreviewTitle">Medical Document Preview</h3>
+        <button class="modal-close" onclick="Reports.closePreviewModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" style="padding: 16px;">
+        <div id="reportPreviewContent">
+          <!-- Image or PDF iframe rendered here -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="Reports.closePreviewModal()">Close Preview</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: USB HARDWARE KEY SCANNER & VERIFIER ==================== -->
+  <div class="modal-overlay" id="usbModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-shield-halved" style="color: var(--accent); margin-right: 8px;"></i> USB Hardware Security Key</h3>
+        <button class="modal-close" onclick="USBSecurity.closeUSBModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div id="usbSecurityWarning" style="display: none; background: #fee2e2; border: 1px solid #fca5a5; color: #b91c1c; border-radius: var(--radius-md); padding: 12px; font-size: 13px; font-weight: 600; margin-bottom: 16px;">
+        </div>
+
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+          Plug your physical authorized USB security drive into this computer to unlock high-privacy medical records (such as HIV reports).
+        </p>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 18px;">
+          <button class="btn-primary" id="scanUSBDrivesBtn" style="flex: 1; justify-content: center;">
+            <i class="fa-solid fa-magnifying-glass"></i> Scan USB Ports
+          </button>
+          <button class="btn-secondary" id="generateUSBKeyBtn" style="flex: 1; justify-content: center;">
+            <i class="fa-solid fa-key"></i> Issue .medkey
+          </button>
+        </div>
+
+        <div class="card" style="margin-bottom: 16px;">
+          <div class="card-header" style="padding: 12px 16px;">
+            <h4 style="font-size: 13px;">Connected USB Drives</h4>
+          </div>
+          <div class="card-body" style="padding: 12px;" id="usbDrivesListModal">
+            <!-- Drives list -->
+          </div>
+        </div>
+
+        <form id="verifyTokenForm" style="margin-bottom: 16px;">
+          <label class="form-label" for="manualUSBTokenInput">Or Enter/Paste Security Token</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="manualUSBTokenInput" class="form-control" placeholder="MEDKEY-..." style="font-family: monospace;">
+            <button type="submit" class="btn-primary" style="white-space: nowrap;">
+              Verify Token
+            </button>
+          </div>
+        </form>
+
+        <div style="text-align: center; border-top: 1px solid var(--border-color); padding-top: 14px;">
+          <button type="button" class="btn-secondary" id="simulateUSBKeyBtn" style="width: 100%; justify-content: center; background: #faf5ff; border-color: #d8b4fe; color: #6b21a8;">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Simulate Hardware USB Key Insertion (Demo Mode)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Application JavaScript Modules -->
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/usb.js"></script>
+  <script src="js/patients.js"></script>
+  <script src="js/reports.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
